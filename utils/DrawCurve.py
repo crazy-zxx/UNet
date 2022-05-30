@@ -2,7 +2,6 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import MultipleLocator
 
 
 def draw(epochs, loss_list, title, x_label, y_label, color_list, save_path):

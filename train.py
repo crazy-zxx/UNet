@@ -6,7 +6,7 @@ import torch
 from torch import optim, save
 from torch.utils.data import DataLoader
 from torchvision import transforms
-from torch.nn import MSELoss,CrossEntropyLoss
+from torch.nn import MSELoss
 
 from data.FruitFlyCell import FruitFlyCell
 from model.unet2d import UNet

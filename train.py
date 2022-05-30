@@ -72,7 +72,6 @@ def train():
     val_acc = []
     for epoch in range(epochs):
         model.train()
-
         total_loss = 0
         steps = 0
         for img, label in train_dataloader:

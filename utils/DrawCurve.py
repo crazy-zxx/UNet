@@ -6,7 +6,7 @@ from matplotlib.ticker import MultipleLocator
 
 
 def draw(epochs, loss_list, title, x_label, y_label, color_list, save_path):
-    plt.figure()
+    fig = plt.figure()
     x = range(1, epochs + 1)
     for y, c in zip(loss_list, color_list):
         plt.plot(x, y, color=c)
@@ -22,6 +22,7 @@ def draw(epochs, loss_list, title, x_label, y_label, color_list, save_path):
     os.makedirs(save_path, exist_ok=True)
     plt.savefig(os.path.join(save_path, f'{title}.png'))
     # plt.show()
+    plt.close(fig)
 
 
 if __name__ == '__main__':

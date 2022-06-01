@@ -4,7 +4,6 @@ import SimpleITK as sitk
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms
 
 
 def resize_image_itk(itkimage, newSize, resamplemethod=sitk.sitkNearestNeighbor):
@@ -62,12 +61,14 @@ class Hippocampus(Dataset):
 
     def __getitem__(self, item):
         if self.train:
+            # 图像resize
             image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[item]), (64, 64, 64)))
             label1 = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.labels[item]), (64, 64, 64)))
+            # label图像分割多通道
             label2 = label1.copy()
             label1[label1 != 1] = 0
             label2[label2 != 2] = 0
-
+            # 归一化
             image = np.expand_dims(self.transform(image), axis=0)
             label1 = np.expand_dims(self.transform(label1), axis=0)
             label2 = np.expand_dims(self.transform(label2), axis=0)

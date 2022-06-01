@@ -2,7 +2,8 @@ import os
 
 import imageio
 import numpy as np
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
 
 
 class FruitFlyCell(Dataset):
@@ -50,3 +51,14 @@ class FruitFlyCell(Dataset):
             if self.transform:
                 image = self.transform(image)
             return image
+
+
+if __name__ == '__main__':
+    transform = transforms.Compose([
+        transforms.ToTensor()  # data-->[0,1]
+    ])
+    h = FruitFlyCell(dirname='../datasets/2d', train=True, transform=transform)
+    batch_size = 1
+    dataloader = DataLoader(h, batch_size=batch_size, shuffle=False, num_workers=0)
+    for i, img in enumerate(dataloader):
+        print(i)

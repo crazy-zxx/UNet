@@ -23,8 +23,6 @@ class DoubleConv(nn.Module):
 class UNet(nn.Module):
     def __init__(self, n_channels, n_classes):
         super(UNet, self).__init__()
-        self.n_channels = n_channels
-        self.n_classes = n_classes
 
         self.left_conv1 = DoubleConv(in_channels=n_channels, out_channels=64)
         self.down = nn.MaxPool2d(kernel_size=2, stride=2)

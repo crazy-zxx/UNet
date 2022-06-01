@@ -5,14 +5,13 @@ import SimpleITK as sitk
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
-from torchvision import transforms
 
 from data.Hippocampus import Hippocampus
 from model.unet3d import UNet
 
 
 def test():
-
+    n_classes = 2
     h_test = Hippocampus(dirname='datasets/3d', train=False)
 
     # must set 1
@@ -21,7 +20,7 @@ def test():
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model_path = r'./saved_model/best_model.pth'
-    model = UNet(n_channels=1, n_classes=2).to(device)
+    model = UNet(n_channels=1, n_classes=n_classes).to(device)
     model.load_state_dict(torch.load(model_path))
 
     # enter eval mode
@@ -33,11 +32,11 @@ def test():
             # convert data: shape 4-->3, cuda-->cpu, tensor-->numpy
             pred = model(img).squeeze().cpu().numpy()
             # normalization and rescale to gray (0-255)
-            pred[0] = ((pred[0] - np.min(pred[0])) / (np.max(pred[0]) - np.min(pred[0])))
-            pred[1] = ((pred[1] - np.min(pred[1])) / (np.max(pred[1]) - np.min(pred[1])))*2
+            for j in range(n_classes):
+                pred[j] = ((pred[j] - np.min(pred[j])) / (np.max(pred[j]) - np.min(pred[j]))) * (j + 1)
             # transpose and convert to uint8
             pred = np.around(pred).astype(np.uint8)
-            pred_img = sitk.GetImageFromArray(pred[0]+pred[1])
+            pred_img = sitk.GetImageFromArray(np.max(pred, axis=0))
             # predicted image save path
             pred_save_path = './pred'
             os.makedirs(pred_save_path, exist_ok=True)

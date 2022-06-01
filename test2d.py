@@ -22,7 +22,7 @@ def test():
     test_dataloader = DataLoader(ffcell_test, batch_size=batch_size, shuffle=False, num_workers=0)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model_path = r'./saved_model/best_model.pth'
+    model_path = r'./saved_model_2d/best_model.pth'
     model = UNet(n_channels=1, n_classes=1).to(device)
     model.load_state_dict(torch.load(model_path))
 
@@ -39,7 +39,7 @@ def test():
             # transpose and convert to uint8
             pred = np.around(pred).astype(np.uint8)*255
             # predicted image save path
-            pred_save_path = './pred'
+            pred_save_path = './pred2d'
             os.makedirs(pred_save_path, exist_ok=True)
             # Path(filepath).stem 从路径名中获取无扩展名的文件名
             pred_img_name = os.path.join(pred_save_path, f'{Path(ffcell_test.images[i]).stem}.png')

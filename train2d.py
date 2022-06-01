@@ -101,9 +101,10 @@ def train():
             val_avg_acc = total_acc / steps
             print(f'epoch:{epoch} --> val acc:{val_avg_acc}')
             val_acc.append(val_avg_acc)
+            save_path = './saved_model_2d/'
             if val_avg_acc >= max(val_acc):
                 os.makedirs('./saved_model', exist_ok=True)
-                save(model.state_dict(), './saved_model/best_model.pth')
+                save(model.state_dict(), save_path+'best_model.pth')
                 print('save best model successfully!')
 
         draw(epoch+1, [train_loss, val_acc], 'train-val', 'epoch', 'value', ['red', 'green'], './curve')

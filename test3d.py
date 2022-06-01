@@ -19,7 +19,7 @@ def test():
     test_dataloader = DataLoader(h_test, batch_size=batch_size, shuffle=False, num_workers=0)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model_path = r'./saved_model/best_model.pth'
+    model_path = r'./saved_model_3d/best_model.pth'
     model = UNet(n_channels=1, n_classes=n_classes).to(device)
     model.load_state_dict(torch.load(model_path))
 
@@ -38,7 +38,7 @@ def test():
             pred = np.around(pred).astype(np.uint8)
             pred_img = sitk.GetImageFromArray(np.max(pred, axis=0))
             # predicted image save path
-            pred_save_path = './pred'
+            pred_save_path = './pred3d'
             os.makedirs(pred_save_path, exist_ok=True)
             # Path(filepath).stem 从路径名中获取无扩展名的文件名
             pred_img_name = os.path.join(pred_save_path, f'{Path(h_test.images[i]).stem}')

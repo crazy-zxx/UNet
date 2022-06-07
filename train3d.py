@@ -1,12 +1,13 @@
 import copy
 import os
+from pathlib import Path
 
+import SimpleITK as sitk
 import numpy as np
 import torch
 from torch import optim, save
-from torch.utils.data import DataLoader
-from torchvision import transforms
 from torch.nn import MSELoss
+from torch.utils.data import DataLoader
 
 from data.Hippocampus import Hippocampus
 from model.unet3d import UNet
@@ -50,14 +51,15 @@ def dice_coeff(pred, target):
 
 def train():
     ratio = 0.3
-    ffcell_train, ffcell_val = train_val_split(ratio)
+    h_train, h_val = train_val_split(ratio)
 
     batch_size = 1
-    train_dataloader = DataLoader(ffcell_train, batch_size=batch_size, shuffle=True, num_workers=0)
-    val_dataloader = DataLoader(ffcell_val, batch_size=1, shuffle=True, num_workers=0)
+    train_dataloader = DataLoader(h_train, batch_size=batch_size, shuffle=True, num_workers=0)
+    val_dataloader = DataLoader(h_val, batch_size=1, shuffle=True, num_workers=0)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = UNet(n_channels=1, n_classes=2).to(device)
+    n_classes = 2
+    model = UNet(n_channels=1, n_classes=n_classes).to(device)
 
     mse_loss = MSELoss()
 

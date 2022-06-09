@@ -1,6 +1,6 @@
 import os
 
-import imageio
+import cv2
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
@@ -40,14 +40,14 @@ class FruitFlyCell(Dataset):
 
     def __getitem__(self, item):
         if self.train:
-            image = np.expand_dims(np.array(imageio.imread(self.images[item], as_gray=False)), axis=2)
-            label = np.expand_dims(np.array(imageio.imread(self.labels[item], as_gray=False)), axis=2)
+            image = np.expand_dims(cv2.imread(self.images[item], cv2.IMREAD_GRAYSCALE), axis=2)
+            label = np.expand_dims(cv2.imread(self.labels[item], cv2.IMREAD_GRAYSCALE), axis=2)
             if self.transform:
                 image = self.transform(image)
                 label = self.transform(label)
             return image, label
         else:
-            image = np.expand_dims(np.array(imageio.imread(self.images[item], as_gray=False)), axis=2)
+            image = np.expand_dims(cv2.imread(self.images[item], cv2.IMREAD_GRAYSCALE), axis=2)
             if self.transform:
                 image = self.transform(image)
             return image

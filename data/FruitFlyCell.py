@@ -4,6 +4,9 @@ import cv2
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
+from utils.oneHot import mask2onehot
+
+classes_label = [0, 255]
 
 
 class FruitFlyCell(Dataset):
@@ -40,14 +43,14 @@ class FruitFlyCell(Dataset):
 
     def __getitem__(self, item):
         if self.train:
-            image = np.expand_dims(cv2.imread(self.images[item], cv2.IMREAD_GRAYSCALE), axis=2)
-            label = np.expand_dims(cv2.imread(self.labels[item], cv2.IMREAD_GRAYSCALE), axis=2)
+            image = np.expand_dims(cv2.resize(cv2.imread(self.images[item], cv2.IMREAD_GRAYSCALE), [512, 512]), axis=2)
+            label = mask2onehot(cv2.resize(cv2.imread(self.labels[item], cv2.IMREAD_GRAYSCALE), [512, 512]),
+                                classes_label)
             if self.transform:
                 image = self.transform(image)
-                label = self.transform(label)
             return image, label
         else:
-            image = np.expand_dims(cv2.imread(self.images[item], cv2.IMREAD_GRAYSCALE), axis=2)
+            image = np.expand_dims(cv2.resize(cv2.imread(self.images[item], cv2.IMREAD_GRAYSCALE), [512, 512]), axis=2)
             if self.transform:
                 image = self.transform(image)
             return image
@@ -57,7 +60,7 @@ if __name__ == '__main__':
     transform = transforms.Compose([
         transforms.ToTensor()  # data-->[0,1]
     ])
-    h = FruitFlyCell(dirname='../datasets/2d', train=True, transform=transform)
+    h = FruitFlyCell(dirname='../datasets/2d/cell', train=True, transform=transform)
     batch_size = 1
     dataloader = DataLoader(h, batch_size=batch_size, shuffle=False, num_workers=0)
     for i, img in enumerate(dataloader):

@@ -1,29 +1,31 @@
 import os
 from pathlib import Path
 
-import imageio
-import numpy as np
+import cv2
 import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
 from data.FruitFlyCell import FruitFlyCell
 from model.unet2d import UNet
+from utils.oneHot import onehot2mask
+
+test_datasets_path = r'datasets/2d/cell'
+model_path = r'./saved_model_2d/best_model.pth'
+pred_save_path = './pred2d'
+n_classes = 2
 
 
 def test():
     cell_transform = transforms.Compose([
-        transforms.ToTensor()  # data-->[0,1]
+        transforms.ToTensor()
     ])
-    ffcell_test = FruitFlyCell(dirname='datasets/2d', train=False, transform=cell_transform)
-
-    # must set 1
-    batch_size = 1
-    test_dataloader = DataLoader(ffcell_test, batch_size=batch_size, shuffle=False, num_workers=0)
+    ds_test = FruitFlyCell(dirname=test_datasets_path, train=False, transform=cell_transform)
+    test_dataloader = DataLoader(ds_test, batch_size=1, shuffle=False, num_workers=0)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model_path = r'./saved_model_2d/best_model.pth'
-    model = UNet(n_channels=1, n_classes=1).to(device)
+
+    model = UNet(n_channels=1, n_classes=n_classes).to(device)
     model.load_state_dict(torch.load(model_path))
 
     # enter eval mode
@@ -34,17 +36,13 @@ def test():
             img = img.to(device)
             # convert data: shape 4-->3, cuda-->cpu, tensor-->numpy
             pred = model(img).squeeze().cpu().numpy()
-            # normalization and rescale to gray (0-255)
-            pred = ((pred - np.min(pred)) / (np.max(pred) - np.min(pred)))
-            # transpose and convert to uint8
-            pred = np.around(pred).astype(np.uint8)*255
-            # predicted image save path
-            pred_save_path = './pred2d'
+            pred_img = onehot2mask(pred) * 255
+
             os.makedirs(pred_save_path, exist_ok=True)
             # Path(filepath).stem 从路径名中获取无扩展名的文件名
-            pred_img_name = os.path.join(pred_save_path, f'{Path(ffcell_test.images[i]).stem}.png')
+            pred_img_name = os.path.join(pred_save_path, f'{Path(ds_test.images[i]).stem}.png')
             # save image
-            imageio.imwrite(pred_img_name, pred)
+            cv2.imwrite(pred_img_name, pred_img)
             print(f'save {pred_img_name} successfully!')
 
 

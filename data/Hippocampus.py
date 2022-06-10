@@ -5,6 +5,10 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 
+from utils.oneHot import mask2onehot
+
+classes_label = [0, 1, 2]
+
 
 def resize_image_itk(itkimage, newSize, resamplemethod=sitk.sitkNearestNeighbor):
     resampler = sitk.ResampleImageFilter()
@@ -13,7 +17,7 @@ def resize_image_itk(itkimage, newSize, resamplemethod=sitk.sitkNearestNeighbor)
     newSize = np.array(newSize, float)
     factor = originSize / newSize
     newSpacing = originSpacing * factor
-    newSize = newSize.astype(np.int)
+    newSize = newSize.astype(np.int32)
     resampler.SetReferenceImage(itkimage)
     resampler.SetSize(newSize.tolist())
     resampler.SetOutputSpacing(newSpacing.tolist())
@@ -63,26 +67,22 @@ class Hippocampus(Dataset):
         if self.train:
             # 图像resize
             image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[item]), (64, 64, 64)))
-            label1 = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.labels[item]), (64, 64, 64)))
+            label = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.labels[item]), (64, 64, 64)))
             # label图像分割多通道
-            label2 = label1.copy()
-            label1[label1 != 1] = 0
-            label2[label2 != 2] = 0
+            label = mask2onehot(label, classes_label)
             # 归一化
-            image = np.expand_dims(self.transform(image), axis=0)
-            label1 = np.expand_dims(self.transform(label1), axis=0)
-            label2 = np.expand_dims(self.transform(label2), axis=0)
-            label = np.concatenate([label1, label2], axis=0)
-            return torch.tensor(image).float(), torch.tensor(label).float()
+            image = self.transform(image)
+            label = self.transform(label)
+            return torch.tensor(image).unsqueeze(dim=0).float(), torch.tensor(label).float()
         else:
             image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[item]), (64, 64, 64)))
-            image = np.expand_dims(self.transform(image), axis=0)
-            return torch.tensor(image).float()
+            image = self.transform(image)
+            return torch.tensor(image).unsqueeze(dim=0).float()
 
 
 if __name__ == '__main__':
 
-    h = Hippocampus(dirname='../datasets/3d', train=True)
+    h = Hippocampus(dirname='../datasets/3d/hippocampus', train=True)
     batch_size = 1
     dataloader = DataLoader(h, batch_size=batch_size, shuffle=False, num_workers=0)
     for i, img in enumerate(dataloader):

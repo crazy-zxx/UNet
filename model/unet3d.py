@@ -29,7 +29,7 @@ class UNet(nn.Module):
         self.left_conv3 = DoubleConv(in_channels=128, out_channels=256)
         self.left_conv4 = DoubleConv(in_channels=256, out_channels=512)
         self.center_conv = DoubleConv(in_channels=512, out_channels=1024)
-        # self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+
         self.up1 = nn.ConvTranspose3d(in_channels=1024, out_channels=512, kernel_size=2, stride=2, padding=0)
         self.right_conv1 = DoubleConv(in_channels=1024, out_channels=512)
         self.up2 = nn.ConvTranspose3d(in_channels=512, out_channels=256, kernel_size=2, stride=2, padding=0)
@@ -72,5 +72,5 @@ class UNet(nn.Module):
 
 
 if __name__ == '__main__':
-    net = UNet(n_channels=3, n_classes=3)
+    net = UNet(n_channels=1, n_classes=3)
     print(net)

@@ -8,7 +8,7 @@ def draw(epochs, value_list, label_list, title, x_label, y_label, color_list, sa
     fig = plt.figure()
     x = range(1, epochs + 1)
     for y, l, c in zip(value_list, label_list, color_list):
-        plt.plot(x, y, 'o-', color=c, label=l)
+        plt.plot(x, y, color=c, label=l)
     plt.title(title)
     plt.xlabel(x_label)
     plt.ylabel(y_label)

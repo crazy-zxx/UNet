@@ -59,9 +59,10 @@ class Hippocampus(Dataset):
     def __len__(self):
         return len(self.images)
 
-    def transform(self, data):
-        _range = np.max(data) - np.min(data)
-        return (data - np.min(data)) / _range
+    def normalization(self, data):
+        a = data - np.min(data)
+        b = np.max(data) - np.min(data)
+        return np.divide(a, b, out=np.zeros_like(a, dtype=np.float64), where=b != 0)
 
     def __getitem__(self, item):
         if self.train:
@@ -71,19 +72,20 @@ class Hippocampus(Dataset):
             # label图像分割多通道
             label = mask2onehot(label, classes_label)
             # 归一化
-            image = self.transform(image)
-            label = self.transform(label)
+            image = self.normalization(image)
+            label = self.normalization(label)
             return torch.tensor(image).unsqueeze(dim=0).float(), torch.tensor(label).float()
         else:
             image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[item]), (64, 64, 64)))
-            image = self.transform(image)
+            image = self.normalization(image)
             return torch.tensor(image).unsqueeze(dim=0).float()
 
 
 if __name__ == '__main__':
 
     h = Hippocampus(dirname='../datasets/3d/hippocampus', train=True)
-    batch_size = 1
+    batch_size = 2
     dataloader = DataLoader(h, batch_size=batch_size, shuffle=False, num_workers=0)
-    for i, img in enumerate(dataloader):
-        print(i)
+    for image, label in dataloader:
+        print(image.shape, label.shape)
+        break

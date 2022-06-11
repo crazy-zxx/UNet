@@ -5,12 +5,12 @@ import SimpleITK as sitk
 import torch
 from torch.utils.data import DataLoader
 
-from data.MICCAI_Abdomen import Abdomen
+from data.MICCAI_Abdomen import Abdomen, resize_image_itk
 from model.unet3d import UNet
 from utils.oneHot import onehot2mask
 
 test_datasets_path = r'./datasets/3d/Abdomen'
-model_path = r'./saved_model_3d_Abdomen/best_model.pth'
+model_path = r'./saved_model_Abdomen/best_model.pth'
 pred_save_path = r'./pred3d_Abdomen'
 n_classes = 14
 
@@ -32,7 +32,8 @@ def test():
             img = img.to(device)
             # convert data: shape 4-->3, cuda-->cpu, tensor-->numpy
             pred = model(img).squeeze().cpu().numpy()
-            pred_img = sitk.GetImageFromArray(onehot2mask(pred))
+            image_size = sitk.GetArrayFromImage(sitk.ReadImage(h_test[i])).shape
+            pred_img = resize_image_itk(sitk.GetImageFromArray(onehot2mask(pred)), image_size)
             # predicted image save path
 
             os.makedirs(pred_save_path, exist_ok=True)

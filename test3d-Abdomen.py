@@ -1,27 +1,23 @@
 import os
 from pathlib import Path
 
-import cv2
+import SimpleITK as sitk
 import torch
 from torch.utils.data import DataLoader
-from torchvision import transforms
 
-from data.FruitFlyCell import FruitFlyCell
-from model.unet2d import UNet
+from data.MICCAI_Abdomen import Abdomen
+from model.unet3d import UNet
 from utils.oneHot import onehot2mask
 
-test_datasets_path = r'./datasets/2d/cell'
-model_path = r'./saved_model_2d/best_model.pth'
-pred_save_path = r'./pred2d'
-n_classes = 2
+test_datasets_path = r'./datasets/3d/Abdomen'
+model_path = r'./saved_model_3d_Abdomen/best_model.pth'
+pred_save_path = r'./pred3d_Abdomen'
+n_classes = 14
 
 
 def test():
-    cell_transform = transforms.Compose([
-        transforms.ToTensor()
-    ])
-    ds_test = FruitFlyCell(dirname=test_datasets_path, train=False, transform=cell_transform)
-    test_dataloader = DataLoader(ds_test, batch_size=1, shuffle=False, num_workers=0)
+    h_test = Abdomen(dirname=test_datasets_path, train=False)
+    test_dataloader = DataLoader(h_test, batch_size=1, shuffle=False, num_workers=0)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -36,13 +32,15 @@ def test():
             img = img.to(device)
             # convert data: shape 4-->3, cuda-->cpu, tensor-->numpy
             pred = model(img).squeeze().cpu().numpy()
-            pred_img = onehot2mask(pred) * 255
+            pred_img = sitk.GetImageFromArray(onehot2mask(pred))
+            # predicted image save path
 
             os.makedirs(pred_save_path, exist_ok=True)
             # Path(filepath).stem 从路径名中获取无扩展名的文件名
-            pred_img_name = os.path.join(pred_save_path, f'{Path(ds_test.images[i]).stem}.png')
+            pred_img_name = os.path.join(pred_save_path, f'{Path(h_test.images[i]).stem}')
             # save image
-            cv2.imwrite(pred_img_name, pred_img)
+            # imageio.imwrite(pred_img_name, pred)
+            sitk.WriteImage(pred_img, pred_img_name)
             print(f'save {pred_img_name} successfully!')
 
 

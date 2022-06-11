@@ -7,21 +7,21 @@ from torch import optim, save
 from torch.nn import MSELoss
 from torch.utils.data import DataLoader
 
-from data.Hippocampus import Hippocampus
+from data.MICCAI_Abdomen import Abdomen
 from model.unet3d import UNet
 from utils.drawCurve import draw
 
-train_datasets_path = r'./datasets/3d/hippocampus'
-model_save_path = r'./saved_model_3d/'
-curve_save_path = r'./curve-3d'
+train_datasets_path = r'./datasets/3d/Abdomen'
+model_save_path = r'./saved_model_Abdomen'
+curve_save_path = r'./curve_3d_Abdomen'
 batch_size = 1
-n_classes = 3
+n_classes = 14
 epochs = 100
 
 
 def train_val_split(ratio):
     # load train data
-    h = Hippocampus(dirname=train_datasets_path, train=True)
+    h = Abdomen(dirname=train_datasets_path, train=True)
     length = len(h)
     # random choice sample
     val_index = np.random.choice(range(length), int(length * ratio), replace=False)

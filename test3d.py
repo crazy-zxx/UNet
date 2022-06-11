@@ -9,9 +9,9 @@ from data.Hippocampus import Hippocampus
 from model.unet3d import UNet
 from utils.oneHot import onehot2mask
 
-test_datasets_path = r'datasets/3d/hippocampus'
+test_datasets_path = r'./datasets/3d/hippocampus'
 model_path = r'./saved_model_3d/best_model.pth'
-pred_save_path = './pred3d'
+pred_save_path = r'./pred3d'
 n_classes = 3
 
 

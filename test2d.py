@@ -37,7 +37,7 @@ def test():
             # convert data: shape 4-->3, cuda-->cpu, tensor-->numpy
             pred = model(img).squeeze().cpu().numpy()
             pred_img = onehot2mask(pred) * 255
-            image_size = ds_test.images[i].shape
+            image_size = cv2.imread(ds_test.images[i], cv2.IMREAD_GRAYSCALE).shape
             pred_img = cv2.resize(pred_img, image_size)
             os.makedirs(pred_save_path, exist_ok=True)
             # Path(filepath).stem 从路径名中获取无扩展名的文件名

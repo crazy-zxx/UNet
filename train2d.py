@@ -13,7 +13,7 @@ from model.unet2d import UNet
 from utils.drawCurve import draw
 
 train_datasets_path = r'./datasets/2d/cell'
-model_save_path = r'./saved_model_2d/'
+model_save_path = r'./saved_model_2d'
 curve_save_path = r'./curve-2d'
 batch_size = 1
 n_classes = 2
@@ -111,7 +111,7 @@ def train():
 
             if val_avg_acc >= max(val_acc):
                 os.makedirs(model_save_path, exist_ok=True)
-                save(model.state_dict(), model_save_path + 'best_model.pth')
+                save(model.state_dict(), os.path.join(model_save_path, 'best_model.pth'))
                 print('save best model successfully!')
 
         draw(epoch + 1, [train_loss, val_acc], ['train_loss', 'val_acc'], 'train-val-2d', 'epoch', 'value',

@@ -5,7 +5,7 @@ import SimpleITK as sitk
 import torch
 from torch.utils.data import DataLoader
 
-from data.Hippocampus import Hippocampus
+from data.Hippocampus import Hippocampus,resize_image_itk
 from model.unet3d import UNet
 from utils.oneHot import onehot2mask
 
@@ -32,9 +32,9 @@ def test():
             img = img.to(device)
             # convert data: shape 4-->3, cuda-->cpu, tensor-->numpy
             pred = model(img).squeeze().cpu().numpy()
-            pred_img = sitk.GetImageFromArray(onehot2mask(pred))
+            image_size = sitk.GetArrayFromImage(sitk.ReadImage(h_test.images[i])).shape
+            pred_img = resize_image_itk(sitk.GetImageFromArray(onehot2mask(pred)), image_size)
             # predicted image save path
-
             os.makedirs(pred_save_path, exist_ok=True)
             # Path(filepath).stem 从路径名中获取无扩展名的文件名
             pred_img_name = os.path.join(pred_save_path, f'{Path(h_test.images[i]).stem}')

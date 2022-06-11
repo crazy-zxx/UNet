@@ -11,7 +11,8 @@ from data.MICCAI_Abdomen import Abdomen
 from model.unet3d import UNet
 from utils.drawCurve import draw
 
-train_datasets_path = r'./datasets/3d/Abdomen'
+# train_datasets_path = r'./datasets/3d/Abdomen'
+train_datasets_path = r'E:\datasets\Abdomen'
 model_save_path = r'./saved_model_Abdomen'
 curve_save_path = r'./curve_3d_Abdomen'
 batch_size = 1
@@ -22,7 +23,7 @@ epochs = 100
 def train_val_split(ratio):
     # load train data
     h = Abdomen(dirname=train_datasets_path, train=True)
-    length = len(h)
+    length = len(h.images)
     # random choice sample
     val_index = np.random.choice(range(length), int(length * ratio), replace=False)
     # copy object

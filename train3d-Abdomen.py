@@ -4,11 +4,11 @@ import os
 import numpy as np
 import torch
 from torch import optim, save
-from torch.nn import MSELoss
 from torch.utils.data import DataLoader
 
 from data.MICCAI_Abdomen import Abdomen
 from model.unet3d import UNet
+from utils.DiceLoss import DiceLoss
 from utils.drawCurve import draw
 
 # train_datasets_path = r'./datasets/3d/Abdomen'
@@ -66,7 +66,7 @@ def train():
 
     model = UNet(n_channels=1, n_classes=n_classes).to(device)
 
-    loss_func = MSELoss()
+    loss_func = DiceLoss()
 
     lr = 1e-2
     optimizer = optim.Adam(model.parameters(), lr=lr)

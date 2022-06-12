@@ -122,4 +122,3 @@ if __name__ == '__main__':
     dataloader = DataLoader(h, batch_size=batch_size, shuffle=True, num_workers=0)
     for image, label in dataloader:
         print(image.shape, label.shape)
-        break

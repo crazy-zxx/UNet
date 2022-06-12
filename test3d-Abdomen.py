@@ -40,7 +40,7 @@ def test():
             pred_image.append(sitk.GetImageFromArray(onehot2mask(pred)))
             if (i + 1) % per_image_patchs == 0:
                 image_size = sitk.GetArrayFromImage(sitk.ReadImage(h_test.images[i//per_image_patchs])).shape
-                pred_img = np.hstack(pred_image).reshape(image_size)
+                pred_img = np.hstack(pred_image).resize(image_size)
                 # predicted image save path
                 os.makedirs(pred_save_path, exist_ok=True)
                 # Path(filepath).stem 从路径名中获取无扩展名的文件名

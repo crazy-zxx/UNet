@@ -21,7 +21,8 @@ def test():
     h_test = Abdomen(dirname=test_datasets_path, train=False)
     test_dataloader = DataLoader(h_test, batch_size=1, shuffle=False, num_workers=0)
 
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cpu'
 
     model = UNet(n_channels=1, n_classes=n_classes).to(device)
     model.load_state_dict(torch.load(model_path))
@@ -29,28 +30,29 @@ def test():
     # enter eval mode
     model.eval()
 
-    # todo: wait train madel to val
     per_image_patchs = int(len(h_test) / len(h_test.images))
     with torch.no_grad():
-        pred_image = []
+        pred_image_patchs = []
         for i, img in enumerate(test_dataloader):
             img = img.to(device)
             # convert data: shape 4-->3, cuda-->cpu, tensor-->numpy
             pred = model(img).squeeze().cpu().numpy()
-            pred_image.append(sitk.GetImageFromArray(onehot2mask(pred)))
+            pred_image_patchs.append(onehot2mask(pred))
             if (i + 1) % per_image_patchs == 0:
-                image_size = sitk.GetArrayFromImage(sitk.ReadImage(h_test.images[i // per_image_patchs])).shape
-                pred_image = np.hstack(pred_image).resize((512, 512, 128))
-                pred_img = resize_image_itk(sitk.GetImageFromArray(pred_image), image_size)
+                itk_image = sitk.ReadImage(h_test.images[i // per_image_patchs])
+                image_size = itk_image.GetSize()  # 读取该数据的size
+                spacing = itk_image.GetSpacing()  # 读取该数据的spacing
+                pred_image = np.reshape(np.hstack(pred_image_patchs), (128, 512, 512))
+                pred_itk_img = resize_image_itk(sitk.GetImageFromArray(pred_image), image_size)
                 # predicted image save path
                 os.makedirs(pred_save_path, exist_ok=True)
                 # Path(filepath).stem 从路径名中获取无扩展名的文件名
-                pred_img_name = os.path.join(pred_save_path, f'{Path(h_test.images[i]).stem}')
+                pred_img_name = os.path.join(pred_save_path, f'{Path(h_test.images[i // per_image_patchs]).stem}')
                 # save image
-                # imageio.imwrite(pred_img_name, pred)
-                sitk.WriteImage(pred_img, pred_img_name)
+                pred_itk_img.SetSpacing(spacing) # 设置spacing，这一步别忘了
+                sitk.WriteImage(pred_itk_img, pred_img_name)
                 print(f'save {pred_img_name} successfully!')
-                pred_image.clear()
+                pred_image_patchs.clear()
 
 
 if __name__ == '__main__':

@@ -26,7 +26,7 @@ def train_val_split(ratio):
     # split by images number
     length = len(h.images)
     # random choice sample
-    val_index = np.random.choice(range(length), int(length * ratio), replace=False)
+    val_index = np.random.choice(range(length), int(length * ratio)+1, replace=False)
     # copy object
     h_train = copy.copy(h)
     h_val = copy.copy(h)
@@ -109,8 +109,9 @@ def train():
 
             if val_avg_acc >= max(val_acc):
                 os.makedirs(model_save_path, exist_ok=True)
-                save(model.state_dict(), os.path.join(model_save_path, 'best_model.pth'))
-                print('save best model successfully!')
+                model_name = os.path.join(model_save_path, 'best_model.pth')
+                save(model.state_dict(), model_name)
+                print(f'{model_name} , save best model successfully!')
 
         draw(epoch + 1, [train_loss, val_acc], ['train_loss', 'val_acc'], 'train-val', 'epoch', 'value',
              ['red', 'green'], curve_save_path)

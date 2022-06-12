@@ -31,11 +31,17 @@ def resize_image_itk(itkimage, newSize, resamplemethod=sitk.sitkNearestNeighbor)
 class Hippocampus(Dataset):
     def __init__(self, dirname, train=True):
         super(Hippocampus, self).__init__()
+
+        self.image_size = (64, 64, 64)
+        self.patch_size = (64, 64, 64)
+        self.step = (64, 64, 64)
+
         self.train = train
         if self.train:
             self.path = f'{dirname}/train'
         else:
             self.path = f'{dirname}/test'
+            self.step = self.patch_size
         self.images = []
         self.labels = []
         for f in os.listdir(self.path):
@@ -57,28 +63,56 @@ class Hippocampus(Dataset):
                 print('not found right directory!')
 
     def __len__(self):
-        return len(self.images)
+        return np.prod((np.array(self.image_size) - np.array(self.patch_size)) / self.step + 1).astype(int) \
+               * len(self.images)
 
     def normalization(self, data):
         a = data - np.min(data)
         b = np.max(data) - np.min(data)
         return np.divide(a, b, out=np.zeros_like(a, dtype=np.float64), where=b != 0)
 
+    def crop(self, data):
+        # Tensor.unfold(dimension, size, step)
+        windows_unpacked = data.unfold(1, self.patch_size[0], self.step[0]) \
+            .unfold(2, self.patch_size[1], self.step[1]) \
+            .unfold(3, self.patch_size[2], self.step[2])
+        # crop
+        windows = windows_unpacked.permute(1, 2, 3, 0, 4, 5, 6). \
+            reshape(-1, self.patch_size[0], self.patch_size[1], self.patch_size[2])
+
+        return windows
+
     def __getitem__(self, item):
+        # which image
+        per_image_patchs = int(self.__len__() / len(self.images))
+        i = int(item / per_image_patchs + 1)
+        j = int(item - (i - 1) * per_image_patchs)
         if self.train:
             # 图像resize
-            image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[item]), (64, 64, 64)))
-            label = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.labels[item]), (64, 64, 64)))
-            # label图像分割多通道
-            label = mask2onehot(label, classes_label)
+            image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[i - 1]), self.image_size))
+            label = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.labels[i - 1]), self.image_size))
             # 归一化
-            image = self.normalization(image)
-            label = self.normalization(label)
-            return torch.tensor(image).unsqueeze(dim=0).float(), torch.tensor(label).float()
+            image = torch.tensor(self.normalization(image)).unsqueeze(dim=0).float()
+            label = torch.tensor(label).unsqueeze(dim=0).float()
+            # crop
+            image = self.crop(image).numpy()
+            label = self.crop(label).numpy()
+            image_crop = image[j]
+            label_crop = label[j]
+            # label图像分割多通道
+            label_crop = mask2onehot(label_crop, classes_label)
+
+            return torch.tensor(image_crop).unsqueeze(dim=0).float(), torch.tensor(label_crop).float()
         else:
-            image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[item]), (64, 64, 64)))
-            image = self.normalization(image)
-            return torch.tensor(image).unsqueeze(dim=0).float()
+            # 图像resize
+            image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[i - 1]), self.image_size))
+            # 归一化
+            image = torch.tensor(self.normalization(image)).unsqueeze(dim=0).float()
+            # crop
+            image = self.crop(image).numpy()
+            image_crop = image[j]
+
+            return torch.tensor(image_crop).unsqueeze(dim=0).float()
 
 
 if __name__ == '__main__':

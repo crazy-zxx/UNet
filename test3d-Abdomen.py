@@ -30,14 +30,13 @@ def test():
     model.eval()
 
     # todo: wait train madel to val
-    per_image_patchs = len(h_test) / len(h_test.images)
+    per_image_patchs = int(len(h_test) / len(h_test.images))
     with torch.no_grad():
         pred_image = []
         for i, img in enumerate(test_dataloader):
             img = img.to(device)
             # convert data: shape 4-->3, cuda-->cpu, tensor-->numpy
             pred = model(img).squeeze().cpu().numpy()
-            # pred_img = resize_image_itk(sitk.GetImageFromArray(onehot2mask(pred)), image_size)
             pred_image.append(sitk.GetImageFromArray(onehot2mask(pred)))
             if (i + 1) % per_image_patchs == 0:
                 image_size = sitk.GetArrayFromImage(sitk.ReadImage(h_test.images[i//per_image_patchs])).shape

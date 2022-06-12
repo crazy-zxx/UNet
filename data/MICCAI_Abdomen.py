@@ -84,7 +84,7 @@ class Abdomen(Dataset):
 
     def __getitem__(self, item):
         # which image
-        per_image_patchs = self.__len__() / len(self.images)
+        per_image_patchs = int(self.__len__() / len(self.images))
         i = int(item / per_image_patchs + 1)
         j = int(item - (i - 1) * per_image_patchs)
         if self.train:

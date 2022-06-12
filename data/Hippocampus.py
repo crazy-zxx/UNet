@@ -100,7 +100,7 @@ class Hippocampus(Dataset):
         # 计算所在的图像上的patch索引
         j = int(item - (i - 1) * per_image_patchs)
         if self.train:
-            # 读取图像，并resize
+            # 读取图像，并resize。数据shape会由image_size(x,y,z)变成(z,y,x) ！！！
             image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[i - 1]), self.image_size))
             label = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.labels[i - 1]), self.image_size))
             # 图像归一化，标签不用归一化

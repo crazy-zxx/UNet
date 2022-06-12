@@ -33,8 +33,8 @@ class Abdomen(Dataset):
         super(Abdomen, self).__init__()
 
         self.image_size = (512, 512, 128)
-        self.patch_size = (64, 64, 64)
-        self.step = (32, 32, 32)
+        self.patch_size = (128, 128, 128)
+        self.step = (128, 128, 128)
 
         self.train = train
         if self.train:
@@ -61,7 +61,6 @@ class Abdomen(Dataset):
                         print('wrong')
             else:
                 print('not found right directory!')
-
 
     def __len__(self):
         return np.prod((np.array(self.image_size) - np.array(self.patch_size)) / self.step + 1).astype(int) \
@@ -90,8 +89,8 @@ class Abdomen(Dataset):
         j = int(item - (i - 1) * per_image_patchs)
         if self.train:
             # 图像resize
-            image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[i-1]), self.image_size))
-            label = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.labels[i-1]), self.image_size))
+            image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[i - 1]), self.image_size))
+            label = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.labels[i - 1]), self.image_size))
             # 归一化
             image = torch.tensor(self.normalization(image)).unsqueeze(dim=0).float()
             label = torch.tensor(label).unsqueeze(dim=0).float()
@@ -106,7 +105,7 @@ class Abdomen(Dataset):
             return torch.tensor(image_crop).unsqueeze(dim=0).float(), torch.tensor(label_crop).float()
         else:
             # 图像resize
-            image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[i-1]), self.image_size))
+            image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[i - 1]), self.image_size))
             # 归一化
             image = torch.tensor(self.normalization(image)).unsqueeze(dim=0).float()
             # crop
@@ -120,7 +119,7 @@ if __name__ == '__main__':
 
     h = Abdomen(dirname=r'E:\datasets\Abdomen', train=True)
     batch_size = 2
-    dataloader = DataLoader(h, batch_size=batch_size, shuffle=False, num_workers=0)
+    dataloader = DataLoader(h, batch_size=batch_size, shuffle=True, num_workers=0)
     for image, label in dataloader:
         print(image.shape, label.shape)
         break

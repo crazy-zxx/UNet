@@ -23,6 +23,7 @@ epochs = 100
 def train_val_split(ratio):
     # load train data
     h = Abdomen(dirname=train_datasets_path, train=True)
+    # split by images number
     length = len(h.images)
     # random choice sample
     val_index = np.random.choice(range(length), int(length * ratio), replace=False)

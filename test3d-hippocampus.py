@@ -11,8 +11,8 @@ from model.unet3d import UNet
 from utils.oneHot import onehot2mask
 
 test_datasets_path = r'./datasets/3d/hippocampus'
-model_path = r'./saved_model_3d/best_model.pth'
-pred_save_path = r'./pred3d'
+model_path = r'./saved_model_3d_hippocampus/best_model.pth'
+pred_save_path = r'./pred_3d_hippocampus'
 n_classes = 3
 
 

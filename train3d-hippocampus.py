@@ -12,8 +12,8 @@ from model.unet3d import UNet
 from utils.drawCurve import draw
 
 train_datasets_path = r'./datasets/3d/hippocampus'
-model_save_path = r'./saved_model_3d'
-curve_save_path = r'./curve-3d'
+model_save_path = r'./saved_model_3d_hippocampus'
+curve_save_path = r'./curve_3d_hippocampus'
 batch_size = 1
 n_classes = 3
 epochs = 100

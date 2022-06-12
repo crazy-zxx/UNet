@@ -13,7 +13,7 @@ from utils.drawCurve import draw
 
 # train_datasets_path = r'./datasets/3d/Abdomen'
 train_datasets_path = r'E:\datasets\Abdomen'
-model_save_path = r'./saved_model_Abdomen'
+model_save_path = r'./saved_model_3d_Abdomen'
 curve_save_path = r'./curve_3d_Abdomen'
 batch_size = 1
 n_classes = 14

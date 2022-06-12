@@ -11,8 +11,8 @@ from model.unet2d import UNet
 from utils.oneHot import onehot2mask
 
 test_datasets_path = r'./datasets/2d/cell'
-model_path = r'./saved_model_2d/best_model.pth'
-pred_save_path = r'./pred2d'
+model_path = r'./saved_model_2d_cell/best_model.pth'
+pred_save_path = r'./pred_2d_cell'
 n_classes = 2
 
 

@@ -12,8 +12,8 @@ from utils.oneHot import onehot2mask
 
 # test_datasets_path = r'./datasets/3d/Abdomen'
 test_datasets_path = r'E:\datasets\Abdomen'
-model_path = r'./saved_model_Abdomen/best_model.pth'
-pred_save_path = r'./pred3d_Abdomen'
+model_path = r'./saved_model_3d_Abdomen/best_model.pth'
+pred_save_path = r'./pred_3d_Abdomen'
 n_classes = 14
 
 

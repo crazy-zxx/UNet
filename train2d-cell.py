@@ -13,8 +13,8 @@ from model.unet2d import UNet
 from utils.drawCurve import draw
 
 train_datasets_path = r'./datasets/2d/cell'
-model_save_path = r'./saved_model_2d'
-curve_save_path = r'./curve_2d'
+model_save_path = r'./saved_model_2d_cell'
+curve_save_path = r'./curve_2d_cell'
 batch_size = 1
 n_classes = 2
 epochs = 100

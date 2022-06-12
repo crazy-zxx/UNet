@@ -23,6 +23,7 @@ def test():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     model = UNet(n_channels=1, n_classes=n_classes).to(device)
+    # 加载模型
     model.load_state_dict(torch.load(model_path))
 
     # enter eval mode
@@ -35,11 +36,14 @@ def test():
             img = img.to(device)
             # convert data: shape 4-->3, cuda-->cpu, tensor-->numpy
             pred = model(img).squeeze().cpu().numpy()
+            # 通过onehot获取patch预测结果
             pred_image_patchs.append(onehot2mask(pred))
+            # 预测完每张图的patch数目
             if (i + 1) % per_image_patchs == 0:
                 itk_image = sitk.ReadImage(h_test.images[i // per_image_patchs])
                 image_size = itk_image.GetSize()  # 读取该数据的size
                 spacing = itk_image.GetSpacing()  # 读取该数据的spacing
+                # 将patch reshape成结果图像
                 pred_image = np.reshape(np.hstack(pred_image_patchs), (64, 64, 64))
                 pred_itk_img = resize_image_itk(sitk.GetImageFromArray(pred_image), image_size)
                 # predicted image save path
@@ -47,7 +51,7 @@ def test():
                 # Path(filepath).stem 从路径名中获取无扩展名的文件名
                 pred_img_name = os.path.join(pred_save_path, f'{Path(h_test.images[i // per_image_patchs]).stem}')
                 # save image
-                pred_itk_img.SetSpacing(spacing)  # 设置spacing，这一步别忘了
+                pred_itk_img.SetSpacing(spacing)  # 设置spacing
                 sitk.WriteImage(pred_itk_img, pred_img_name)
                 print(f'save {pred_img_name} successfully!')
                 pred_image_patchs.clear()

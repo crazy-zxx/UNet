@@ -20,6 +20,7 @@ epochs = 100
 
 
 def train_val_split(ratio):
+    """ 按照比率（ratio）将训练集分割成训练集和验证集 """
     # load train data
     h = Hippocampus(dirname=train_datasets_path, train=True)
     length = len(h.images)
@@ -44,6 +45,7 @@ def train_val_split(ratio):
 
 
 def dice_coeff(pred, target):
+    """ 计算dice准确率 """
     smooth = 1.
     num = pred.size(0)
     m1 = pred.view(num, -1)
@@ -111,6 +113,7 @@ def train():
                 save(model.state_dict(), model_name)
                 print(f'{model_name} , save best model successfully!')
 
+        # 绘制损失、准确率图像并保存
         draw(epoch + 1, [train_loss, val_acc], ['train_loss', 'val_acc'], 'train-val', 'epoch', 'value',
              ['red', 'green'], curve_save_path)
 

@@ -32,8 +32,12 @@ class Hippocampus(Dataset):
     def __init__(self, dirname, train=True):
         super(Hippocampus, self).__init__()
 
+        # 所有图像resize到相同大小
         self.image_size = (64, 64, 64)
+        # 受制于GPU显存，如果图像尺寸太大，则必须进行crop。大于（128，128，128）就建议进行切分！
+        # 切分小块的大小
         self.patch_size = (64, 64, 64)
+        # 按照步长来crop
         self.step = (64, 64, 64)
 
         self.train = train
@@ -42,6 +46,8 @@ class Hippocampus(Dataset):
         else:
             self.path = f'{dirname}/test'
             self.step = self.patch_size
+
+        # 训练数据集文件名列表
         self.images = []
         self.labels = []
         for f in os.listdir(self.path):
@@ -63,15 +69,19 @@ class Hippocampus(Dataset):
                 print('not found right directory!')
 
     def __len__(self):
+        # 数据集大小（如果crop，则是crop后的总块数）
         return np.prod((np.array(self.image_size) - np.array(self.patch_size)) / self.step + 1).astype(int) \
                * len(self.images)
 
     def normalization(self, data):
+        """   数据归一化  """
         a = data - np.min(data)
         b = np.max(data) - np.min(data)
+        # 避免除0操作
         return np.divide(a, b, out=np.zeros_like(a, dtype=np.float64), where=b != 0)
 
     def crop(self, data):
+        """     切分数据，此处是切分一张图像，输入张量大小：（1,x,y,z）    """
         # Tensor.unfold(dimension, size, step)
         windows_unpacked = data.unfold(1, self.patch_size[0], self.step[0]) \
             .unfold(2, self.patch_size[1], self.step[1]) \
@@ -83,35 +93,39 @@ class Hippocampus(Dataset):
         return windows
 
     def __getitem__(self, item):
-        # which image
+        # 计算每张图切分的patch数目
         per_image_patchs = int(self.__len__() / len(self.images))
+        # 计算所在图片的索引+1
         i = int(item / per_image_patchs + 1)
+        # 计算所在的图像上的patch索引
         j = int(item - (i - 1) * per_image_patchs)
         if self.train:
-            # 图像resize
+            # 读取图像，并resize
             image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[i - 1]), self.image_size))
             label = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.labels[i - 1]), self.image_size))
-            # 归一化
+            # 图像归一化，标签不用归一化
             image = torch.tensor(self.normalization(image)).unsqueeze(dim=0).float()
             label = torch.tensor(label).unsqueeze(dim=0).float()
             # crop
             image = self.crop(image).numpy()
             label = self.crop(label).numpy()
+            # 找到需要的patch
             image_crop = image[j]
             label_crop = label[j]
-            # label图像分割多通道
+            # label分割多通道（onehot）
             label_crop = mask2onehot(label_crop, classes_label)
-
+            # 返回patch
             return torch.tensor(image_crop).unsqueeze(dim=0).float(), torch.tensor(label_crop).float()
         else:
-            # 图像resize
+            # 读取图像，并resize
             image = sitk.GetArrayFromImage(resize_image_itk(sitk.ReadImage(self.images[i - 1]), self.image_size))
-            # 归一化
+            # 图像归一化
             image = torch.tensor(self.normalization(image)).unsqueeze(dim=0).float()
             # crop
             image = self.crop(image).numpy()
+            # 找到需要的patch
             image_crop = image[j]
-
+            # 返回patch
             return torch.tensor(image_crop).unsqueeze(dim=0).float()
 
 

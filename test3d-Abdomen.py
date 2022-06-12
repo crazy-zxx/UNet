@@ -49,7 +49,7 @@ def test():
                 # Path(filepath).stem 从路径名中获取无扩展名的文件名
                 pred_img_name = os.path.join(pred_save_path, f'{Path(h_test.images[i // per_image_patchs]).stem}')
                 # save image
-                pred_itk_img.SetSpacing(spacing) # 设置spacing，这一步别忘了
+                pred_itk_img.SetSpacing(spacing)  # 设置spacing
                 sitk.WriteImage(pred_itk_img, pred_img_name)
                 print(f'save {pred_img_name} successfully!')
                 pred_image_patchs.clear()

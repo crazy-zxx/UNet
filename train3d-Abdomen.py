@@ -26,7 +26,7 @@ def train_val_split(ratio):
     # split by images number
     length = len(h.images)
     # random choice sample
-    val_index = np.random.choice(range(length), int(length * ratio)+1, replace=False)
+    val_index = np.random.choice(range(length), int(length * ratio), replace=False)
     # copy object
     h_train = copy.copy(h)
     h_val = copy.copy(h)

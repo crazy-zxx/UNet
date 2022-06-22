@@ -63,5 +63,6 @@ if __name__ == '__main__':
     h = FruitFlyCell(dirname='../datasets/2d/cell', train=True, transform=transform)
     batch_size = 1
     dataloader = DataLoader(h, batch_size=batch_size, shuffle=False, num_workers=0)
-    for i, img in enumerate(dataloader):
-        print(i)
+    for img, label in dataloader:
+        print(img.shape, label.shape)
+        break

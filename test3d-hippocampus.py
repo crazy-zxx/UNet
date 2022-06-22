@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 import SimpleITK as sitk
-import numpy as np
 import torch
 from torch.utils.data import DataLoader
 

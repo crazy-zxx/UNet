@@ -66,9 +66,9 @@ class UNet(nn.Module):
         x9 = self.right_conv4(temp)
         x10 = self.out_cov(x9)
 
-        x10 = self.out(x10)
+        x11 = self.out(x10)
 
-        return x10
+        return x11
 
 
 if __name__ == '__main__':

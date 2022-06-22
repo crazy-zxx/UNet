@@ -23,7 +23,7 @@ def train_val_split(ratio):
     """ 按照比率（ratio）将训练集分割成训练集和验证集 """
     # load train data
     h = Hippocampus(dirname=train_datasets_path, train=True)
-    length = len(h.images)
+    length = len(h)
     # random choice sample
     val_index = np.random.choice(range(length), int(length * ratio), replace=False)
     # copy object
@@ -55,9 +55,6 @@ def dice_coeff(pred, target):
     return (2. * intersection + smooth) / (m1.sum() + m2.sum() + smooth)
 
 
-def dice_loss(pred, target):
-    return 1-dice_coeff(pred,target)
-
 def train():
     ratio = 0.3
     h_train, h_val = train_val_split(ratio)
@@ -71,7 +68,7 @@ def train():
 
     loss_func = DiceLoss()
 
-    lr = 1e-2
+    lr = 1e-1
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     print('==== start train ====')
@@ -80,7 +77,7 @@ def train():
     val_acc = []
     for epoch in range(epochs):
         model.train()
-        total_loss = 0
+        total_loss = 0.
         steps = 0
         for img, label in train_dataloader:
             img, label = img.to(device), label.to(device)
@@ -97,13 +94,12 @@ def train():
 
         model.eval()
         with torch.no_grad():
-            total_acc = 0
+            total_acc = 0.
             steps = 0
             for img, label in val_dataloader:
                 img = img.to(device)
                 pred = model(img).cpu()
-                dice_acc = dice_coeff(pred=pred, target=label)
-                total_acc += dice_acc
+                total_acc += dice_coeff(pred, label)
                 steps += 1
 
             val_avg_acc = total_acc / steps

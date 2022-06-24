@@ -64,6 +64,9 @@ def train():
     # optimizer
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
+    # todo
+    # epoch:1/100 --> train loss:14.88741397857666
+    # epoch:1/100 --> val acc:-13.999069213867188
     print('==== start train ====')
     # train
     train_loss = []

@@ -1,11 +1,11 @@
-import copy
 import os
+import copy
 
 import numpy as np
 import torch
 from torch import optim, save
-
 from torch.utils.data import DataLoader
+
 from data.Hippocampus import Hippocampus
 from model.unet3d import UNet
 from utils.loss import DiceLoss, DiceBCELoss
@@ -52,7 +52,6 @@ def train_val_split(ratio):
 
 
 def train():
-
     train_datasets, val_datasets = train_val_split(ratio)
     # dataloader
     train_dataloader = DataLoader(train_datasets, batch_size=batch_size, shuffle=True, num_workers=0)

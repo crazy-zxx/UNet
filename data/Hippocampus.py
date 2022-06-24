@@ -63,7 +63,6 @@ class Hippocampus(Dataset):
                 print('not found right directory!')
 
     def __len__(self):
-        # 数据集大小（如果crop，则是crop后的总块数）
         return len(self.images)
 
     def normalization(self, data):
@@ -96,7 +95,7 @@ class Hippocampus(Dataset):
 if __name__ == '__main__':
 
     h = Hippocampus(dirname='../datasets/3d/hippocampus', train=True)
-    batch_size = 2
+    batch_size = 3
     dataloader = DataLoader(h, batch_size=batch_size, shuffle=True, num_workers=0)
     for image, label in dataloader:
         print(image.shape, label.shape)

@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from data.Hippocampus import Hippocampus
 from model.unet3d import UNet
 from utils.DiceLoss import DiceLoss
+from utils.SoftDiceLoss import SoftDiceLoss
 from utils.drawCurve import draw
 
 train_datasets_path = r'./datasets/3d/hippocampus'
@@ -66,7 +67,7 @@ def train():
 
     model = UNet(n_channels=1, n_classes=n_classes).to(device)
 
-    loss_func = DiceLoss()
+    loss_func = SoftDiceLoss()
 
     lr = 1e-1
     optimizer = optim.Adam(model.parameters(), lr=lr)

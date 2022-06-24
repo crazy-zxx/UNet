@@ -1,20 +1,23 @@
 import copy
 import os
+from pathlib import Path
 
 import numpy as np
 import torch
 from torch import optim, save
-from torch.nn import MSELoss
+import SimpleITK as sitk
 
 from torch.utils.data import DataLoader
-from data.Hippocampus import Hippocampus
+from data.Hippocampus import Hippocampus, resize_image_itk
 from model.unet3d import UNet
 from utils.DiceLoss import DiceLoss
 from utils.drawCurve import draw
+from utils.oneHot import onehot2mask
 
 train_datasets_path = r'./datasets/3d/hippocampus'
 model_save_path = r'./saved_model_3d_hippocampus'
 curve_save_path = r'./curve_3d_hippocampus'
+val_save_path = r'./pred_3d_hippocampus'
 batch_size = 1
 n_classes = 3
 epochs = 100
@@ -45,16 +48,6 @@ def train_val_split(ratio):
     return h_train, h_val
 
 
-def dice_coeff(pred, target):
-    """ 计算dice准确率 """
-    smooth = 1.
-    m1 = pred.flatten()
-    m2 = target.flatten()
-    intersection = (m1 * m2).sum()
-
-    return (2. * intersection + smooth) / (m1.sum() + m2.sum() + smooth)
-
-
 def train():
     ratio = 0.3
     h_train, h_val = train_val_split(ratio)
@@ -66,7 +59,7 @@ def train():
 
     model = UNet(n_channels=1, n_classes=n_classes).to(device)
 
-    loss_func = MSELoss()
+    loss_func = DiceLoss()
 
     lr = 1e-2
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -96,11 +89,37 @@ def train():
         with torch.no_grad():
             total_acc = 0.
             steps = 0
-            for img, label in val_dataloader:
+            for i, (img, label) in enumerate(val_dataloader):
                 img = img.to(device)
-                pred = model(img).cpu()
-                total_acc += dice_coeff(pred, label)
+                label = label.to(device)
+                pred = model(img)
+                total_acc += 1 - loss_func(pred, label)
                 steps += 1
+
+                pred = pred.squeeze()
+                # 通过onehot获取patch预测结果
+                pred_image = onehot2mask(pred)
+
+                itk_image = sitk.ReadImage(h_val.images[i])
+                image_size = itk_image.GetSize()  # 读取该数据的size
+                image_spacing = itk_image.GetSpacing()  # 读取该数据的spacing
+                image_origin = itk_image.GetOrigin()
+                image_direction = itk_image.GetDirection()
+
+                pred_itk_img = sitk.GetImageFromArray(pred_image)
+                pred_itk_img.SetSpacing(image_spacing)  # 设置spacing
+                pred_itk_img.SetOrigin(image_origin)
+                pred_itk_img.SetDirection(image_direction)
+                pred_itk_img = resize_image_itk(pred_itk_img, image_size)
+                # predicted image save path
+                global val_save_path
+                val_save_path = val_save_path + f'-epoch_{epoch}'
+                os.makedirs(val_save_path, exist_ok=True)
+                # Path(filepath).stem 从路径名中获取无扩展名(gz)的文件名
+                pred_img_name = os.path.join(val_save_path, f'{Path(h_val.images[i]).stem}')
+                # save image
+                sitk.WriteImage(pred_itk_img, pred_img_name)
+                print(f'save {pred_img_name} successfully!')
 
             val_avg_acc = total_acc / steps
             print(f'epoch:{epoch + 1}/{epochs} --> val acc:{val_avg_acc}')

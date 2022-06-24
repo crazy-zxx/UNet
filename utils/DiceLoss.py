@@ -1,53 +1,19 @@
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
-
-class BinaryDiceLoss(nn.Module):
-    def __init__(self):
-        super(BinaryDiceLoss, self).__init__()
-
-    def forward(self, input, targets):
-        # 获取每个批次的大小 N
-        N = targets.size()[0]
-        # 平滑变量
-        smooth = 1
-        # 将宽高 reshape 到同一纬度
-        input_flat = input.view(N, -1)
-        targets_flat = targets.view(N, -1)
-
-        # 计算交集
-        intersection = input_flat * targets_flat
-        N_dice_eff = (2 * intersection.sum(1) + smooth) / (input_flat.sum(1) + targets_flat.sum(1) + smooth)
-        # 计算一个批次中平均每张图的损失
-        loss = 1 - N_dice_eff.sum() / N
-        return loss
-
-
 class DiceLoss(nn.Module):
-    def __init__(self, weight=None, ignore_index=None, **kwargs):
+    def __init__(self, weight=None, size_average=True):
         super(DiceLoss, self).__init__()
-        self.weight = weight
-        self.ignore_index = ignore_index
-        self.kwargs = kwargs
 
-    def forward(self, input, target):
-        """
-            input tesor of shape = (N, C, H, W)
-            target tensor of shape = (N, H, W)
-        """
-        assert input.shape == target.shape, "predict & target shape do not match"
+    def forward(self, inputs, targets, smooth=1):
+        # comment out if your model contains a sigmoid or equivalent activation layer
+        # inputs = F.sigmoid(inputs)
 
-        binaryDiceLoss = BinaryDiceLoss()
-        total_loss = 0
+        # flatten label and prediction tensors
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
 
-        # 归一化输出
-        logits = F.softmax(input, dim=1)
-        C = target.shape[1]
+        intersection = (inputs * targets).sum()
+        dice = (2. * intersection + smooth) / (inputs.sum() + targets.sum() + smooth)
 
-        # 遍历 channel，得到每个类别的二分类 DiceLoss
-        for i in range(C):
-            dice_loss = binaryDiceLoss(logits[:, i], target[:, i])
-            total_loss += dice_loss
-
-        # 每个类别的平均 dice_loss
-        return total_loss / C
+        return 1 - dice

@@ -15,7 +15,7 @@ pred_save_path = r'./pred_3d_hippocampus'
 n_channels = 1
 n_classes = 3
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
+# test datasets object
 test_datasets = Hippocampus(dirname=test_datasets_path, train=False)
 
 
@@ -26,6 +26,7 @@ def test():
     # load model parameters
     model.load_state_dict(torch.load(model_path))
 
+    print('==== start predict ====')
     # predict
     model.eval()
     with torch.no_grad():

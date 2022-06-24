@@ -20,13 +20,16 @@ n_classes = 3
 lr = 1e-2
 epochs = 100
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+# split train datasets to train and val by ratio
+ratio = 0.3
 # train datasets object
 train_val_datasets = Hippocampus(dirname=train_datasets_path, train=True)
 
 
 def train_val_split(ratio):
-    """ 按照比率（ratio）将训练集分割成训练集和验证集 """
-    # load train data
+    """ split the train datasets into train datasets and val datasets according to ratio """
+
+    global train_val_datasets
     length = len(train_val_datasets)
     # random choice sample
     val_index = np.random.choice(range(length), int(length * ratio), replace=False)
@@ -35,7 +38,7 @@ def train_val_split(ratio):
     val_datasets = copy.copy(train_val_datasets)
     # clear list
     train_datasets.images, train_datasets.labels, val_datasets.images, val_datasets.labels = [], [], [], []
-    # set sample
+    # split
     for i in range(length):
         if i in val_index:
             val_datasets.images.append(train_val_datasets.images[i])
@@ -49,8 +52,7 @@ def train_val_split(ratio):
 
 
 def train():
-    # split train datasets to train and val by ratio
-    ratio = 0.3
+
     train_datasets, val_datasets = train_val_split(ratio)
     # dataloader
     train_dataloader = DataLoader(train_datasets, batch_size=batch_size, shuffle=True, num_workers=0)

@@ -48,9 +48,8 @@ def train_val_split(ratio):
 def dice_coeff(pred, target):
     """ 计算dice准确率 """
     smooth = 1.
-    num = pred.size(0)
-    m1 = pred.view(num, -1)
-    m2 = target.view(num, -1)
+    m1 = pred.flatten()
+    m2 = target.flatten()
     intersection = (m1 * m2).sum()
 
     return (2. * intersection + smooth) / (m1.sum() + m2.sum() + smooth)

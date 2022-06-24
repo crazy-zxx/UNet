@@ -5,14 +5,12 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch import optim, save
-import SimpleITK as sitk
 
 from torch.utils.data import DataLoader
-from data.Hippocampus import Hippocampus, resize_image_itk
+from data.Hippocampus import Hippocampus
 from model.unet3d import UNet
 from utils.DiceLoss import DiceLoss
 from utils.drawCurve import draw
-from utils.oneHot import onehot2mask
 
 train_datasets_path = r'./datasets/3d/hippocampus'
 model_save_path = r'./saved_model_3d_hippocampus'
@@ -88,7 +86,7 @@ def train():
         with torch.no_grad():
             total_acc = 0.
             steps = 0
-            for i, (img, label) in enumerate(val_dataloader):
+            for img, label in val_dataloader:
                 img = img.to(device)
                 pred = model(img).cpu()
                 total_acc += 1 - loss_func(pred, label)

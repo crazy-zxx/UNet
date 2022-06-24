@@ -7,6 +7,7 @@ from torch import optim, save
 from torch.utils.data import DataLoader
 
 from data.Hippocampus import Hippocampus
+from model.ZUNet import ZUNet
 from model.unet3d import UNet
 from utils.loss import DiceLoss, DiceBCELoss
 from utils.drawCurve import draw
@@ -57,7 +58,7 @@ def train():
     train_dataloader = DataLoader(train_datasets, batch_size=batch_size, shuffle=True, num_workers=0)
     val_dataloader = DataLoader(val_datasets, batch_size=1, shuffle=True, num_workers=0)
     # model
-    model = UNet(n_channels=n_channels, n_classes=n_classes).to(device)
+    model = ZUNet(n_channels=n_channels, n_classes=n_classes).to(device)
     # loss function
     loss_func = DiceBCELoss()
     # optimizer

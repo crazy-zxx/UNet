@@ -1,6 +1,5 @@
 import copy
 import os
-from pathlib import Path
 
 import numpy as np
 import torch
@@ -9,7 +8,7 @@ from torch import optim, save
 from torch.utils.data import DataLoader
 from data.Hippocampus import Hippocampus
 from model.unet3d import UNet
-from utils.DiceLoss import DiceLoss
+from utils.loss import DiceLoss,DiceBCELoss
 from utils.drawCurve import draw
 
 train_datasets_path = r'./datasets/3d/hippocampus'
@@ -56,7 +55,7 @@ def train():
 
     model = UNet(n_channels=1, n_classes=n_classes).to(device)
 
-    loss_func = DiceLoss()
+    loss_func = DiceBCELoss()
 
     lr = 1e-2
     optimizer = optim.Adam(model.parameters(), lr=lr)

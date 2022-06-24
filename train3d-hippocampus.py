@@ -17,7 +17,6 @@ from utils.oneHot import onehot2mask
 train_datasets_path = r'./datasets/3d/hippocampus'
 model_save_path = r'./saved_model_3d_hippocampus'
 curve_save_path = r'./curve_3d_hippocampus'
-val_save_path = r'./pred_3d_hippocampus'
 batch_size = 1
 n_classes = 3
 epochs = 100
@@ -91,35 +90,9 @@ def train():
             steps = 0
             for i, (img, label) in enumerate(val_dataloader):
                 img = img.to(device)
-                label = label.to(device)
-                pred = model(img)
+                pred = model(img).cpu()
                 total_acc += 1 - loss_func(pred, label)
                 steps += 1
-
-                pred = pred.squeeze()
-                # 通过onehot获取patch预测结果
-                pred_image = onehot2mask(pred)
-
-                itk_image = sitk.ReadImage(h_val.images[i])
-                image_size = itk_image.GetSize()  # 读取该数据的size
-                image_spacing = itk_image.GetSpacing()  # 读取该数据的spacing
-                image_origin = itk_image.GetOrigin()
-                image_direction = itk_image.GetDirection()
-
-                pred_itk_img = sitk.GetImageFromArray(pred_image)
-                pred_itk_img.SetSpacing(image_spacing)  # 设置spacing
-                pred_itk_img.SetOrigin(image_origin)
-                pred_itk_img.SetDirection(image_direction)
-                pred_itk_img = resize_image_itk(pred_itk_img, image_size)
-                # predicted image save path
-                global val_save_path
-                val_save_path = val_save_path + f'-epoch_{epoch}'
-                os.makedirs(val_save_path, exist_ok=True)
-                # Path(filepath).stem 从路径名中获取无扩展名(gz)的文件名
-                pred_img_name = os.path.join(val_save_path, f'{Path(h_val.images[i]).stem}')
-                # save image
-                sitk.WriteImage(pred_itk_img, pred_img_name)
-                print(f'save {pred_img_name} successfully!')
 
             val_avg_acc = total_acc / steps
             print(f'epoch:{epoch + 1}/{epochs} --> val acc:{val_avg_acc}')

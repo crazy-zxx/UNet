@@ -9,27 +9,28 @@ class ResBlock(nn.Module):
 
         self.block = nn.Sequential(
             nn.Conv3d(in_channels=in_channels, out_channels=out_channels // 2, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm3d(num_features=out_channels//2),
+            nn.BatchNorm3d(num_features=out_channels // 2),
             nn.ReLU(inplace=True),
-            nn.Conv3d(in_channels=out_channels // 2, out_channels=out_channels // 2, kernel_size=3, stride=1,
+            nn.Conv3d(in_channels=out_channels // 2, out_channels=out_channels, kernel_size=3, stride=1,
                       padding=1),
-            nn.BatchNorm3d(num_features=out_channels//2)
+            nn.BatchNorm3d(num_features=out_channels)
         )
 
         self.block_dilation = nn.Sequential(
             nn.Conv3d(in_channels=in_channels, out_channels=out_channels // 2, kernel_size=3, stride=1, padding=2,
                       dilation=2),
-            nn.BatchNorm3d(num_features=out_channels//2),
+            nn.BatchNorm3d(num_features=out_channels // 2),
             nn.ReLU(inplace=True),
-            nn.Conv3d(in_channels=out_channels // 2, out_channels=out_channels // 2, kernel_size=3, stride=1, padding=2,
+            nn.Conv3d(in_channels=out_channels // 2, out_channels=out_channels, kernel_size=3, stride=1, padding=2,
                       dilation=2),
-            nn.BatchNorm3d(num_features=out_channels//2)
+            nn.BatchNorm3d(num_features=out_channels)
         )
 
     def forward(self, x):
         x1 = self.block(x)
         x2 = self.block_dilation(x)
-        x3 = torch.cat([x1, x2], dim=1)
+        # x3 = torch.cat([x1, x2], dim=1)
+        x3 = x1 + x2
         x4 = F.relu(x3, inplace=True)
         return x + x4
 

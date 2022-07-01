@@ -4,35 +4,35 @@ import torch.nn.functional as F
 
 
 class ResBlock(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, channels):
         super(ResBlock, self).__init__()
 
         self.block = nn.Sequential(
-            nn.Conv3d(in_channels=in_channels, out_channels=out_channels // 2, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm3d(num_features=out_channels // 2),
+            nn.Conv3d(in_channels=channels, out_channels=channels, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm3d(num_features=channels),
             nn.ReLU(inplace=True),
-            nn.Conv3d(in_channels=out_channels // 2, out_channels=out_channels, kernel_size=3, stride=1,
-                      padding=1),
-            nn.BatchNorm3d(num_features=out_channels)
+            nn.Conv3d(in_channels=channels, out_channels=channels, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm3d(num_features=channels)
         )
 
-        self.block_dilation = nn.Sequential(
-            nn.Conv3d(in_channels=in_channels, out_channels=out_channels // 2, kernel_size=3, stride=1, padding=2,
-                      dilation=2),
-            nn.BatchNorm3d(num_features=out_channels // 2),
-            nn.ReLU(inplace=True),
-            nn.Conv3d(in_channels=out_channels // 2, out_channels=out_channels, kernel_size=3, stride=1, padding=2,
-                      dilation=2),
-            nn.BatchNorm3d(num_features=out_channels)
-        )
+        # self.block_dilation = nn.Sequential(
+        #     nn.Conv3d(in_channels=channels, out_channels=channels , kernel_size=3, stride=1, padding=2,
+        #               dilation=2),
+        #     nn.BatchNorm3d(num_features=channels),
+        #     nn.ReLU(inplace=True),
+        #     nn.Conv3d(in_channels=channels, out_channels=channels, kernel_size=3, stride=1, padding=2,
+        #               dilation=2),
+        #     nn.BatchNorm3d(num_features=channels)
+        # )
 
     def forward(self, x):
         x1 = self.block(x)
-        x2 = self.block_dilation(x)
+        # x2 = self.block_dilation(x)
         # x3 = torch.cat([x1, x2], dim=1)
-        x3 = x1 + x2
-        x4 = F.relu(x3, inplace=True)
-        return x + x4
+        # x3 = x1 + x2
+        x4 = x + x1
+        out = F.relu(x4, inplace=True)
+        return out
 
 
 class ZUNet(nn.Module):
@@ -41,29 +41,25 @@ class ZUNet(nn.Module):
 
         self.init_conv = nn.Conv3d(in_channels=n_channels, out_channels=64, kernel_size=3, stride=1, padding=1)
 
-        self.left_conv1 = ResBlock(in_channels=64, out_channels=64)
+        self.left_conv1 = ResBlock(64)
         self.down1 = nn.Conv3d(in_channels=64, out_channels=128, kernel_size=3, stride=2, padding=1)
-        self.left_conv2 = ResBlock(in_channels=128, out_channels=128)
+        self.left_conv2 = ResBlock(128)
         self.down2 = nn.Conv3d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1)
-        self.left_conv3 = ResBlock(in_channels=256, out_channels=256)
+        self.left_conv3 = ResBlock(256)
         self.down3 = nn.Conv3d(in_channels=256, out_channels=512, kernel_size=3, stride=2, padding=1)
-        self.left_conv4 = ResBlock(in_channels=512, out_channels=512)
+        self.left_conv4 = ResBlock(512)
         self.down4 = nn.Conv3d(in_channels=512, out_channels=1024, kernel_size=3, stride=2, padding=1)
-        # self.left_conv5 = ResBlock(in_channels=1024, out_channels=1024)
-        # self.down5 = nn.Conv3d(in_channels=1024, out_channels=1024, kernel_size=3, stride=2, padding=1)
 
-        self.center_conv = ResBlock(in_channels=1024, out_channels=1024)
+        self.center_conv = ResBlock(1024)
 
-        # self.up5 = nn.ConvTranspose3d(in_channels=2048, out_channels=1024, kernel_size=2, stride=2, padding=0)
-        # self.right_conv5 = ResBlock(in_channels=1024 + 1024, out_channels=1024)
         self.up4 = nn.ConvTranspose3d(in_channels=1024, out_channels=512, kernel_size=2, stride=2, padding=0)
-        self.right_conv4 = ResBlock(in_channels=512, out_channels=512)
+        self.right_conv4 = ResBlock(512)
         self.up3 = nn.ConvTranspose3d(in_channels=512, out_channels=256, kernel_size=2, stride=2, padding=0)
-        self.right_conv3 = ResBlock(in_channels=256, out_channels=256)
+        self.right_conv3 = ResBlock(256)
         self.up2 = nn.ConvTranspose3d(in_channels=256, out_channels=128, kernel_size=2, stride=2, padding=0)
-        self.right_conv2 = ResBlock(in_channels=128, out_channels=128)
+        self.right_conv2 = ResBlock(128)
         self.up1 = nn.ConvTranspose3d(in_channels=128, out_channels=64, kernel_size=2, stride=2, padding=0)
-        self.right_conv1 = ResBlock(in_channels=64, out_channels=64)
+        self.right_conv1 = ResBlock(64)
         self.out_cov = nn.Conv3d(in_channels=64, out_channels=n_classes, kernel_size=1, stride=1, padding=0)
 
         self.out_sig = nn.Sigmoid()

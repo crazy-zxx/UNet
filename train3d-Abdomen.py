@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 
 from data.MICCAI_Abdomen import Abdomen
 from model.unet3d import UNet
-from utils.DiceLoss import DiceLoss
+from utils.loss import DiceLoss, DiceBCELoss
 from utils.drawCurve import draw
 
 # train_datasets_path = r'./datasets/3d/Abdomen'
@@ -66,7 +66,8 @@ def train():
 
     model = UNet(n_channels=1, n_classes=n_classes).to(device)
 
-    loss_func = DiceLoss()
+    loss_func = DiceBCELoss()
+    acc_func = DiceLoss()
 
     lr = 1e-2
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -99,7 +100,7 @@ def train():
             for img, label in val_dataloader:
                 img = img.to(device)
                 pred = model(img).cpu()
-                dice_acc = dice_coeff(pred=pred, target=label)
+                dice_acc = 1 - acc_func(pred=pred, target=label)
                 total_acc += dice_acc
                 steps += 1
 

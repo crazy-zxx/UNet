@@ -62,6 +62,8 @@ def train():
     model = ZUNet(n_channels=n_channels, n_classes=n_classes).to(device)
     # loss function
     loss_func = DiceBCELoss()
+    acc_func = DiceLoss()
+
     # optimizer
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
@@ -97,7 +99,7 @@ def train():
             for img, label in val_dataloader:
                 img = img.to(device)
                 pred = model(img).cpu()
-                total_acc += 1 - loss_func(pred, label)
+                total_acc += 1 - acc_func(pred, label)
                 steps += 1
             val_avg_acc = total_acc / steps
             print(f'epoch:{epoch + 1}/{epochs} --> val acc:{val_avg_acc}')

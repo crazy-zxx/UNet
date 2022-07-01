@@ -56,6 +56,7 @@ def train():
     model = UNet(n_channels=1, n_classes=n_classes).to(device)
 
     loss_func = DiceBCELoss()
+    dice_loss = DiceLoss()
 
     lr = 1e-2
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -88,7 +89,7 @@ def train():
             for img, label in val_dataloader:
                 img = img.to(device)
                 pred = model(img).cpu()
-                total_acc += 1 - loss_func(pred, label)
+                total_acc += 1 - dice_loss(pred, label)
                 steps += 1
 
             val_avg_acc = total_acc / steps

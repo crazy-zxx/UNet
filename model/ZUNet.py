@@ -35,6 +35,7 @@ class ResBlock(nn.Module):
         return out
 
 
+# wrong net
 class ZUNet(nn.Module):
     def __init__(self, n_channels, n_classes):
         super(ZUNet, self).__init__()

@@ -59,7 +59,7 @@ def train():
     train_dataloader = DataLoader(train_datasets, batch_size=batch_size, shuffle=True, num_workers=0)
     val_dataloader = DataLoader(val_datasets, batch_size=1, shuffle=True, num_workers=0)
     # model
-    model = ZUNet(n_channels=n_channels, n_classes=n_classes).to(device)
+    model = UNet(n_channels=n_channels, n_classes=n_classes).to(device)
     # loss function
     loss_func = DiceBCELoss()
     acc_func = DiceLoss()

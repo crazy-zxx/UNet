@@ -24,7 +24,7 @@ test_datasets = Hippocampus(dirname=test_datasets_path, train=False)
 def test():
     test_dataloader = DataLoader(test_datasets, batch_size=1, shuffle=False, num_workers=0)
     # load model net
-    model = ZUNet(n_channels=n_channels, n_classes=n_classes).to(device)
+    model = UNet(n_channels=n_channels, n_classes=n_classes).to(device)
     # load model parameters
     model.load_state_dict(torch.load(model_path))
 

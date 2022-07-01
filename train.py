@@ -7,8 +7,9 @@ from torch import optim, save
 from torch.utils.data import DataLoader
 
 from data.Hippocampus import Hippocampus
-from model.ZUNet import ZUNet
+from model.unet2d import UNet
 from model.unet3d import UNet
+from model.ZUNet import ZUNet
 from utils.loss import DiceLoss, DiceBCELoss
 from utils.drawCurve import draw
 

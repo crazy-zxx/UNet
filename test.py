@@ -6,8 +6,9 @@ import torch
 from torch.utils.data import DataLoader
 
 from data.Hippocampus import Hippocampus, resize_image_itk
-from model.ZUNet import ZUNet
+from model.unet2d import UNet
 from model.unet3d import UNet
+from model.ZUNet import ZUNet
 from utils.oneHot import onehot2mask
 
 test_datasets_path = r'./datasets/3d/hippocampus'
